@@ -1,15 +1,119 @@
-<mujoco>
-  <option gravity="0 0 -9.81"/>
+<mujoco model="quadruped">
+  <compiler angle="radian" inertiafromgeom="true"/>
+  <option gravity="0 0 -9.81" timestep="0.002"/>
+
+  <default>
+    <joint damping="1.0" armature="0.01" limited="true"/>
+    <geom friction="1.2 0.005 0.0001" condim="3" margin="0.001"/>
+    <position kp="120" kv="8" ctrlrange="-1.8 1.8" forcerange="-40 40"/>
+  </default>
+
   <worldbody>
-    <geom type="plane" size="2 2 0.1" rgba="0.8 0.8 0.8 1"/>
-    <light pos="0 0 3"/>
-    <body pos="0 0 1">
-      <freejoint/>
-      <geom type="box" size="0.1 0.1 0.1" rgba="0.2 0.4 0.9 1"/>
+    <geom name="floor" type="plane" size="3 3 0.1" rgba="0.85 0.85 0.85 1"/>
+    <light pos="0 0 4" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+    <light pos="2 2 3" dir="-1 -1 -1" diffuse="0.4 0.4 0.4"/>
+    <!-- Quadruped (replaces the blue box) -->
+    <body name="torso" pos="0 0 0.28">
+      <freejoint name="root"/>
+      <geom name="torso" type="box" size="0.16 0.09 0.045" mass="3.0" rgba="0.2 0.4 0.9 1"/>
+      <site name="imu" pos="0 0 0" size="0.01" rgba="1 1 0 0.3"/>
+
+      <!-- Front-left: hip abduction (x), hip flexion (y), knee (y) -->
+      <body name="fl_abad" pos="0.12 0.09 0">
+        <joint name="fl_abad" type="hinge" axis="1 0 0" range="-0.6 0.6"/>
+        <geom type="sphere" size="0.025" rgba="0.15 0.35 0.8 1" mass="0.05"/>
+        <body name="fl_hip" pos="0 0.02 0">
+          <joint name="fl_hip" type="hinge" axis="0 1 0" range="-1.2 1.2"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.11" size="0.02" rgba="0.2 0.4 0.9 1" mass="0.15"/>
+          <body name="fl_knee" pos="0 0 -0.11">
+            <joint name="fl_knee" type="hinge" axis="0 1 0" range="-2.2 -0.1"/>
+            <geom type="capsule" fromto="0 0 0 0 0 -0.11" size="0.018" rgba="0.25 0.45 0.95 1" mass="0.1"/>
+            <geom name="fl_foot" type="sphere" pos="0 0 -0.11" size="0.028"
+                  rgba="0.1 0.25 0.6 1" mass="0.04" friction="1.5 0.01 0.001"/>
+          </body>
+        </body>
+      </body>
+
+      <!-- Front-right -->
+      <body name="fr_abad" pos="0.12 -0.09 0">
+        <joint name="fr_abad" type="hinge" axis="1 0 0" range="-0.6 0.6"/>
+        <geom type="sphere" size="0.025" rgba="0.15 0.35 0.8 1" mass="0.05"/>
+        <body name="fr_hip" pos="0 -0.02 0">
+          <joint name="fr_hip" type="hinge" axis="0 1 0" range="-1.2 1.2"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.11" size="0.02" rgba="0.2 0.4 0.9 1" mass="0.15"/>
+          <body name="fr_knee" pos="0 0 -0.11">
+            <joint name="fr_knee" type="hinge" axis="0 1 0" range="-2.2 -0.1"/>
+            <geom type="capsule" fromto="0 0 0 0 0 -0.11" size="0.018" rgba="0.25 0.45 0.95 1" mass="0.1"/>
+            <geom name="fr_foot" type="sphere" pos="0 0 -0.11" size="0.028"
+                  rgba="0.1 0.25 0.6 1" mass="0.04" friction="1.5 0.01 0.001"/>
+          </body>
+        </body>
+      </body>
+
+      <!-- Hind-left -->
+      <body name="hl_abad" pos="-0.12 0.09 0">
+        <joint name="hl_abad" type="hinge" axis="1 0 0" range="-0.6 0.6"/>
+        <geom type="sphere" size="0.025" rgba="0.15 0.35 0.8 1" mass="0.05"/>
+        <body name="hl_hip" pos="0 0.02 0">
+          <joint name="hl_hip" type="hinge" axis="0 1 0" range="-1.2 1.2"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.11" size="0.02" rgba="0.2 0.4 0.9 1" mass="0.15"/>
+          <body name="hl_knee" pos="0 0 -0.11">
+            <joint name="hl_knee" type="hinge" axis="0 1 0" range="-2.2 -0.1"/>
+            <geom type="capsule" fromto="0 0 0 0 0 -0.11" size="0.018" rgba="0.25 0.45 0.95 1" mass="0.1"/>
+            <geom name="hl_foot" type="sphere" pos="0 0 -0.11" size="0.028"
+                  rgba="0.1 0.25 0.6 1" mass="0.04" friction="1.5 0.01 0.001"/>
+          </body>
+        </body>
+      </body>
+
+      <!-- Hind-right -->
+      <body name="hr_abad" pos="-0.12 -0.09 0">
+        <joint name="hr_abad" type="hinge" axis="1 0 0" range="-0.6 0.6"/>
+        <geom type="sphere" size="0.025" rgba="0.15 0.35 0.8 1" mass="0.05"/>
+        <body name="hr_hip" pos="0 -0.02 0">
+          <joint name="hr_hip" type="hinge" axis="0 1 0" range="-1.2 1.2"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.11" size="0.02" rgba="0.2 0.4 0.9 1" mass="0.15"/>
+          <body name="hr_knee" pos="0 0 -0.11">
+            <joint name="hr_knee" type="hinge" axis="0 1 0" range="-2.2 -0.1"/>
+            <geom type="capsule" fromto="0 0 0 0 0 -0.11" size="0.018" rgba="0.25 0.45 0.95 1" mass="0.1"/>
+            <geom name="hr_foot" type="sphere" pos="0 0 -0.11" size="0.028"
+                  rgba="0.1 0.25 0.6 1" mass="0.04" friction="1.5 0.01 0.001"/>
+          </body>
+        </body>
+      </body>
     </body>
-    <body pos="0 0 1.5">
+
+    <!-- Falling red box (disturbance) -->
+    <body name="red_box" pos="0.05 0.05 0.55">
       <freejoint/>
-      <geom type="box" size="0.05 0.05 0.05" rgba="0.9 0.2 0.2 1"/>
+      <geom type="box" size="0.05 0.05 0.05" rgba="0.9 0.2 0.2 1" mass="0.15"/>
     </body>
   </worldbody>
+
+  <actuator>
+    <position name="fl_abad" joint="fl_abad"/>
+    <position name="fl_hip" joint="fl_hip"/>
+    <position name="fl_knee" joint="fl_knee"/>
+    <position name="fr_abad" joint="fr_abad"/>
+    <position name="fr_hip" joint="fr_hip"/>
+    <position name="fr_knee" joint="fr_knee"/>
+    <position name="hl_abad" joint="hl_abad"/>
+    <position name="hl_hip" joint="hl_hip"/>
+    <position name="hl_knee" joint="hl_knee"/>
+    <position name="hr_abad" joint="hr_abad"/>
+    <position name="hr_hip" joint="hr_hip"/>
+    <position name="hr_knee" joint="hr_knee"/>
+  </actuator>
+
+  <keyframe>
+    <!-- Standing crouch + red box above as a disturbance -->
+    <!-- torso freejoint (7) + 12 hinges + red_box freejoint (7) -->
+    <key name="stand"
+         qpos="0 0 0.22 1 0 0 0
+               0.15 0.45 -0.9
+               -0.15 0.45 -0.9
+               0.15 0.55 -0.95
+               -0.15 0.55 -0.95
+               0.05 0.05 0.55 1 0 0 0"/>
+  </keyframe>
 </mujoco>
