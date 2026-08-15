@@ -2,17 +2,151 @@
   <compiler angle="radian" inertiafromgeom="true"/>
   <option gravity="0 0 -9.81" timestep="0.002"/>
 
+  <visual>
+    <headlight diffuse="0.45 0.45 0.4" ambient="0.25 0.28 0.3" specular="0.2 0.2 0.2"/>
+    <rgba haze="0.55 0.65 0.75 1"/>
+    <global azimuth="140" elevation="-20"/>
+  </visual>
+
   <default>
     <joint damping="1.0" armature="0.01" limited="true"/>
     <geom friction="1.2 0.005 0.0001" condim="3" margin="0.001"/>
     <position kp="120" kv="8" ctrlrange="-1.8 1.8" forcerange="-40 40"/>
+    <default class="hill">
+      <geom type="ellipsoid" rgba="0.42 0.58 0.28 1" friction="1.4 0.01 0.001" contype="1" conaffinity="1"/>
+    </default>
+    <default class="tree_trunk">
+      <geom type="cylinder" rgba="0.38 0.24 0.12 1" friction="0.9 0.005 0.0001" contype="1" conaffinity="1"/>
+    </default>
+    <default class="tree_crown">
+      <geom type="ellipsoid" rgba="0.16 0.42 0.18 1" friction="0.6 0.005 0.0001" contype="1" conaffinity="1"/>
+    </default>
+    <default class="rock">
+      <geom type="ellipsoid" rgba="0.45 0.42 0.38 1" friction="1.3 0.01 0.001" contype="1" conaffinity="1"/>
+    </default>
   </default>
 
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.45 0.62 0.82" rgb2="0.85 0.9 0.95" width="512" height="512"/>
+  </asset>
+
   <worldbody>
-    <geom name="floor" type="plane" size="3 3 0.1" rgba="0.85 0.85 0.85 1"/>
-    <light pos="0 0 4" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
-    <light pos="2 2 3" dir="-1 -1 -1" diffuse="0.4 0.4 0.4"/>
-    <!-- Quadruped (replaces the blue box) -->
+    <!-- Outdoor navigation arena: flat spawn, hills, tree corridors -->
+    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.38 0.55 0.28 1" friction="1.3 0.01 0.001"/>
+    <light name="sun" pos="4 2 10" dir="-0.35 -0.2 -1" diffuse="0.9 0.85 0.7" specular="0.3 0.3 0.25" castshadow="true"/>
+    <light name="fill" pos="-3 -4 6" dir="0.4 0.5 -1" diffuse="0.25 0.3 0.35"/>
+
+    <!-- Hills: taller ellipsoids forming valleys / climbable routes. Spawn |xy|<1.2 stays flat. -->
+    <geom name="hill_ne" class="hill" pos="4.0 3.2 -0.05" size="2.4 2.0 0.75"/>
+    <geom name="hill_nw" class="hill" pos="-3.8 3.0 -0.08" size="2.2 2.5 0.7" rgba="0.4 0.56 0.26 1"/>
+    <geom name="hill_se" class="hill" pos="3.6 -3.5 -0.04" size="2.3 2.1 0.85"/>
+    <geom name="hill_sw" class="hill" pos="-3.4 -3.2 -0.1" size="1.9 1.8 0.55" rgba="0.44 0.6 0.3 1"/>
+    <geom name="hill_east_ridge" class="hill" pos="5.2 0.0 -0.06" size="1.5 3.4 0.65" rgba="0.4 0.55 0.27 1"/>
+    <geom name="hill_north_knoll" class="hill" pos="0.2 4.8 -0.05" size="1.6 1.4 0.5"/>
+    <geom name="hill_mid_west" class="hill" pos="-4.8 -0.3 -0.08" size="1.6 1.9 0.55" rgba="0.43 0.58 0.29 1"/>
+    <geom name="hill_near_ne" class="hill" pos="2.6 2.4 -0.12" size="1.3 1.1 0.35" rgba="0.41 0.57 0.27 1"/>
+    <geom name="hill_near_se" class="hill" pos="2.8 -2.2 -0.1" size="1.2 1.15 0.32"/>
+    <geom name="hill_saddle" class="hill" pos="-0.5 2.6 -0.15" size="1.4 0.9 0.28" rgba="0.42 0.58 0.28 1"/>
+
+    <!-- Trees: corridors and chokepoints for path planning (clear +x lane ~y in [-0.6, 0.6]). -->
+    <!-- East corridor walls -->
+    <body name="tree_a" pos="1.8 1.15 0">
+      <geom class="tree_trunk" size="0.09 0.5" pos="0 0 0.5"/>
+      <geom class="tree_crown" size="0.48 0.48 0.55" pos="0 0 1.2"/>
+    </body>
+    <body name="tree_b" pos="1.9 -1.2 0">
+      <geom class="tree_trunk" size="0.08 0.45" pos="0 0 0.45"/>
+      <geom class="tree_crown" size="0.42 0.42 0.5" pos="0 0 1.1" rgba="0.14 0.4 0.16 1"/>
+    </body>
+    <body name="tree_e" pos="3.2 1.35 0.12">
+      <geom class="tree_trunk" size="0.1 0.5" pos="0 0 0.5"/>
+      <geom class="tree_crown" size="0.5 0.5 0.58" pos="0 0 1.25"/>
+    </body>
+    <body name="tree_f" pos="3.4 -1.4 0.1">
+      <geom class="tree_trunk" size="0.09 0.48" pos="0 0 0.48"/>
+      <geom class="tree_crown" size="0.48 0.48 0.52" pos="0 0 1.15" rgba="0.12 0.38 0.15 1"/>
+    </body>
+    <body name="tree_p" pos="4.6 1.2 0.28">
+      <geom class="tree_trunk" size="0.1 0.52" pos="0 0 0.52"/>
+      <geom class="tree_crown" size="0.5 0.5 0.55" pos="0 0 1.25"/>
+    </body>
+    <body name="tree_q" pos="4.8 -1.1 0.22">
+      <geom class="tree_trunk" size="0.09 0.5" pos="0 0 0.5"/>
+      <geom class="tree_crown" size="0.48 0.48 0.55" pos="0 0 1.2" rgba="0.15 0.4 0.17 1"/>
+    </body>
+    <!-- Northwest grove (dense, weave-through) -->
+    <body name="tree_c" pos="-1.7 1.9 0">
+      <geom class="tree_trunk" size="0.1 0.55" pos="0 0 0.55"/>
+      <geom class="tree_crown" size="0.52 0.52 0.6" pos="0 0 1.3"/>
+    </body>
+    <body name="tree_g" pos="-2.6 1.1 0.05">
+      <geom class="tree_trunk" size="0.11 0.6" pos="0 0 0.6"/>
+      <geom class="tree_crown" size="0.55 0.55 0.65" pos="0 0 1.4"/>
+    </body>
+    <body name="tree_r" pos="-2.2 2.8 0.08">
+      <geom class="tree_trunk" size="0.09 0.48" pos="0 0 0.48"/>
+      <geom class="tree_crown" size="0.45 0.45 0.52" pos="0 0 1.15" rgba="0.13 0.36 0.14 1"/>
+    </body>
+    <body name="tree_l" pos="-3.8 2.4 0.2">
+      <geom class="tree_trunk" size="0.1 0.55" pos="0 0 0.55"/>
+      <geom class="tree_crown" size="0.55 0.55 0.62" pos="0 0 1.35"/>
+    </body>
+    <body name="tree_n" pos="-3.2 3.6 0.25">
+      <geom class="tree_trunk" size="0.08 0.44" pos="0 0 0.44"/>
+      <geom class="tree_crown" size="0.42 0.42 0.48" pos="0 0 1.08"/>
+    </body>
+    <!-- Southwest / south obstacles -->
+    <body name="tree_d" pos="-1.6 -2.0 0">
+      <geom class="tree_trunk" size="0.08 0.42" pos="0 0 0.42"/>
+      <geom class="tree_crown" size="0.4 0.4 0.48" pos="0 0 1.05" rgba="0.18 0.45 0.2 1"/>
+    </body>
+    <body name="tree_h" pos="-3.5 -1.6 0.08">
+      <geom class="tree_trunk" size="0.08 0.45" pos="0 0 0.45"/>
+      <geom class="tree_crown" size="0.45 0.45 0.5" pos="0 0 1.1"/>
+    </body>
+    <body name="tree_o" pos="0.7 -2.4 0">
+      <geom class="tree_trunk" size="0.07 0.4" pos="0 0 0.4"/>
+      <geom class="tree_crown" size="0.38 0.38 0.45" pos="0 0 0.98" rgba="0.17 0.44 0.19 1"/>
+    </body>
+    <body name="tree_j" pos="-0.6 -3.6 0.05">
+      <geom class="tree_trunk" size="0.1 0.52" pos="0 0 0.52"/>
+      <geom class="tree_crown" size="0.52 0.52 0.58" pos="0 0 1.25"/>
+    </body>
+    <body name="tree_s" pos="1.5 -3.4 0.08">
+      <geom class="tree_trunk" size="0.09 0.48" pos="0 0 0.48"/>
+      <geom class="tree_crown" size="0.46 0.46 0.52" pos="0 0 1.15"/>
+    </body>
+    <!-- North / far perimeter -->
+    <body name="tree_i" pos="1.2 3.5 0.18">
+      <geom class="tree_trunk" size="0.09 0.5" pos="0 0 0.5"/>
+      <geom class="tree_crown" size="0.5 0.5 0.55" pos="0 0 1.2" rgba="0.15 0.4 0.17 1"/>
+    </body>
+    <body name="tree_k" pos="5.6 2.3 0.35">
+      <geom class="tree_trunk" size="0.12 0.65" pos="0 0 0.65"/>
+      <geom class="tree_crown" size="0.62 0.62 0.7" pos="0 0 1.5"/>
+    </body>
+    <body name="tree_m" pos="5.5 -3.2 0.4">
+      <geom class="tree_trunk" size="0.09 0.48" pos="0 0 0.48"/>
+      <geom class="tree_crown" size="0.5 0.5 0.55" pos="0 0 1.2"/>
+    </body>
+    <body name="tree_t" pos="-5.2 0.8 0.15">
+      <geom class="tree_trunk" size="0.11 0.58" pos="0 0 0.58"/>
+      <geom class="tree_crown" size="0.58 0.58 0.64" pos="0 0 1.38" rgba="0.14 0.38 0.15 1"/>
+    </body>
+    <body name="tree_u" pos="-0.2 1.7 0.05">
+      <geom class="tree_trunk" size="0.07 0.4" pos="0 0 0.4"/>
+      <geom class="tree_crown" size="0.36 0.36 0.42" pos="0 0 0.95"/>
+    </body>
+
+    <!-- Rocks for local foot / path obstacles -->
+    <geom name="rock_1" class="rock" pos="1.15 0.55 0.04" size="0.12 0.1 0.06"/>
+    <geom name="rock_2" class="rock" pos="-1.0 -0.55 0.035" size="0.1 0.12 0.05"/>
+    <geom name="rock_3" class="rock" pos="2.4 1.9 0.28" size="0.15 0.12 0.08" rgba="0.5 0.48 0.44 1"/>
+    <geom name="rock_4" class="rock" pos="-2.5 -2.6 0.12" size="0.14 0.11 0.07"/>
+    <geom name="rock_5" class="rock" pos="0.9 -1.5 0.04" size="0.09 0.11 0.05"/>
+    <geom name="rock_6" class="rock" pos="-0.4 3.2 0.22" size="0.16 0.13 0.09"/>
+
+    <!-- Quadruped -->
     <body name="torso" pos="0 0 0.28">
       <freejoint name="root"/>
       <geom name="torso" type="box" size="0.16 0.09 0.045" mass="3.0" rgba="0.2 0.4 0.9 1"/>
